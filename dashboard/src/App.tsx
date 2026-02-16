@@ -7,6 +7,8 @@ import SystemHealth from './components/SystemHealth';
 import Settings from './components/Settings';
 import Analytics from './components/Analytics';
 import NotificationCenter from './components/NotificationCenter';
+import DashboardOverview from './components/DashboardOverview';
+import RecentActivityFeed from './components/RecentActivityFeed';
 import { Search, Shield } from 'lucide-react';
 import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
@@ -56,34 +58,35 @@ function App() {
         {/* Dashboard Content */}
         <div className="flex-1 overflow-hidden bg-eth-950">
           {/* DASHBOARD TAB */}
-          <TabsContent value="Dashboard" className="mt-0 h-full w-full flex animate-in fade-in duration-500 data-[state=inactive]:hidden focus-visible:outline-none">
-            {/* LEFT: Agent Squad */}
-            <div className="w-80 border-r border-eth-700/50 p-6 overflow-auto shrink-0 bg-eth-900/20">
-              <h2 className="text-[10px] font-bold text-eth-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                <Shield className="text-eth-accent" size={12} />
-                Active Agent Squad
-              </h2>
-              <UserManager />
-            </div>
+          <TabsContent value="Dashboard" className="mt-0 h-full w-full animate-in fade-in duration-500 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
+            <div className="p-8 space-y-8">
+              {/* OVERVIEW METRICS */}
+              <DashboardOverview />
 
-            {/* CENTER: Mission Command */}
-            <div className="flex-1 p-6 overflow-auto bg-eth-950 border-r border-eth-700/50">
-               <h2 className="text-[10px] font-bold text-eth-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                <Activity className="text-eth-accent" size={12} />
-                Mission Command Center
-              </h2>
-              <KanbanBoard />
-            </div>
+              {/* MAIN CONTENT GRID */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* LEFT: Agent Squad */}
+                <div className="space-y-6">
+                  <h2 className="text-sm font-bold text-eth-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                    <Shield className="text-eth-accent" size={14} />
+                    Active Agents
+                  </h2>
+                  <UserManager />
+                </div>
 
-            {/* RIGHT: Live Audit */}
-            <div className="w-80 p-6 overflow-auto shrink-0 bg-eth-900/20">
-              <h2 className="text-[10px] font-bold text-eth-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                <Activity className="text-eth-accent" size={12} />
-                Live Tactical Intel
-              </h2>
-              <ActivityLog />
-              <div className="mt-8">
-                <SystemHealth />
+                {/* CENTER: Recent Activity */}
+                <div className="lg:col-span-2 space-y-6">
+                  <h2 className="text-sm font-bold text-eth-500 uppercase tracking-[0.2em]">
+                    Recent Activity
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <RecentActivityFeed />
+                    <div className="space-y-6">
+                      <ActivityLog />
+                      <SystemHealth />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </TabsContent>

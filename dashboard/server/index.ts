@@ -173,6 +173,54 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// GET /api/stats - Dashboard statistics
+app.get('/api/stats', async (req, res) => {
+  try {
+    const tasks = await prisma.task.findMany();
+    const logs = await prisma.systemLog.findMany({
+      take: 100,
+      orderBy: { timestamp: 'desc' }
+    });
+
+    const stats = {
+      tasks: {
+        total: tasks.length,
+        byStatus: {
+          planning: tasks.filter(t => t.status === 'Planning').length,
+          inProgress: tasks.filter(t => t.status === 'In Progress').length,
+          done: tasks.filter(t => t.status === 'Done').length,
+        },
+        byPriority: {
+          high: tasks.filter(t => t.priority === 'High').length,
+          medium: tasks.filter(t => t.priority === 'Medium').length,
+          low: tasks.filter(t => t.priority === 'Low').length,
+        },
+        completionRate: tasks.length > 0 
+          ? Math.round((tasks.filter(t => t.status === 'Done').length / tasks.length) * 100)
+          : 0,
+      },
+      logs: {
+        total: logs.length,
+        byLevel: {
+          info: logs.filter(l => l.level === 'info').length,
+          warn: logs.filter(l => l.level === 'warn').length,
+          error: logs.filter(l => l.level === 'error').length,
+          success: logs.filter(l => l.level === 'success').length,
+        },
+      },
+      system: {
+        uptime: Math.round(os.uptime()),
+        memory: Math.round(((os.totalmem() - os.freemem()) / os.totalmem()) * 100),
+      },
+    };
+
+    res.json(stats);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch stats' });
+  }
+});
+
 // --- FILESYSTEM API ---
 const WORKSPACE_ROOT = '/home/codespace/.openclaw/workspace';
 
