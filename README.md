@@ -5,12 +5,17 @@ A modern, tactical mission control dashboard for OpenClaw AI operations. Built w
 ## 🚀 Features
 
 ### Core Functionality
-- **Mission Command Center** - Kanban-style task management with drag-and-drop
+- **Drag-and-Drop Kanban** - Full drag-and-drop task management with touch support
+- **Task Assignment** - Assign missions to specific agents
+- **Export/Import** - Data portability with JSON export/import
+- **Theme Switching** - Dark/Light/Auto modes with system preference detection
+- **Advanced Filtering** - Filter by status, priority, and search
 - **Real-time Analytics** - Live metrics and performance tracking
 - **Agent Squad Management** - Monitor and coordinate AI agents
 - **Memory Explorer** - Browse and view workspace memory files
 - **Activity Monitoring** - Real-time system logs and notifications
 - **System Health** - Live CPU, memory, and heartbeat monitoring
+- **Comment System** - Collaborative task discussions
 
 ### Components
 
@@ -23,11 +28,14 @@ A modern, tactical mission control dashboard for OpenClaw AI operations. Built w
 
 #### 🎯 Missions Tab
 - Full Kanban board with Planning → In Progress → Done columns
+- **Drag-and-drop** - Move tasks between columns or reorder within columns
+- **Task assignment** - Assign tasks to specific agents
+- **Export/Import** - Download tasks as JSON or import from file
 - Task creation, editing, and deletion
 - Priority-based filtering (High/Medium/Low)
+- **Status filtering** - Filter by Planning/In Progress/Done
 - Search functionality
 - Task detail modal with commenting system
-- Quick advance tasks between columns
 
 #### 💾 Memory Tab
 - File explorer for `/workspace/memory` directory
@@ -47,11 +55,12 @@ A modern, tactical mission control dashboard for OpenClaw AI operations. Built w
 - Clearance level display
 
 #### ⚙️ Settings Tab
-- Appearance customization
-- Auto-refresh configuration
-- Notification preferences
-- Performance tuning
-- Heartbeat service settings
+- **Appearance:** Theme selection (Dark/Light/Auto) with real-time switching
+- **Auto-refresh:** Configuration with interval control
+- **Notifications:** Preference management
+- **Performance:** Tuning options (log entries, API timeout, heartbeat)
+- **Security:** Clearance level display
+- **Persistence:** All settings saved to localStorage
 
 ### Advanced Features
 - **Notification Center** - In-app notification system with read/unread tracking
@@ -78,14 +87,15 @@ A modern, tactical mission control dashboard for OpenClaw AI operations. Built w
 ### Database Schema
 ```prisma
 model Task {
-  id        String   @id @default(uuid())
-  title     String
-  desc      String?
-  status    String   @default("Planning")
-  priority  String   @default("Medium")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  comments  Comment[]
+  id         String   @id @default(uuid())
+  title      String
+  desc       String?
+  status     String   @default("Planning")
+  priority   String   @default("Medium")
+  assignedTo String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  comments   Comment[]
 }
 
 model Comment {

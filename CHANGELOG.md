@@ -2,6 +2,65 @@
 
 All notable changes to the OpenClaw Dashboard will be documented in this file.
 
+## [0.3.0] - 2026-02-16
+
+### Added
+- **Drag-and-Drop Task Management** - Full drag-and-drop support using @dnd-kit
+  - Drag tasks between columns (Planning → In Progress → Done)
+  - Drag to reorder tasks within columns
+  - Visual drag overlay and drop zones
+  - Auto-save on drop with API updates
+  - Touch-friendly mobile support
+
+- **Task Assignment** - Assign tasks to specific agents
+  - Database schema extension (assignedTo field)
+  - Agent dropdown in task creation modal
+  - Assignment badges on task cards
+  - Filter by assigned agent
+
+- **Export/Import Tasks** - Data portability
+  - Export all tasks to JSON file
+  - Import tasks from JSON file
+  - Filename includes timestamp
+  - Validation on import
+
+- **Theme Toggle** - Dark/Light/Auto mode support
+  - ThemeProvider with React Context
+  - Persistent theme storage (localStorage)
+  - Auto mode follows system preference
+  - Integrated with Settings page
+  - Real-time theme switching
+
+- **Advanced Filtering** - Enhanced task filtering
+  - Filter by status (Planning/In Progress/Done)
+  - Filter by priority (High/Medium/Low)
+  - Search by title or description
+  - Multiple filters work together
+  - Filter state persists during session
+
+- **GripVertical Icon** - Visual drag handles on task cards
+
+### Enhanced
+- **KanbanBoard** - Complete rewrite with drag-and-drop
+  - Import/Export buttons in toolbar
+  - Status filter dropdown
+  - Improved layout and spacing
+  - Better mobile responsiveness
+
+- **Settings Page** - Theme toggle now functional
+  - Connected to ThemeProvider
+  - Real-time theme updates
+  - Auto/Light/Dark options work
+
+- **Database Schema** - Added assignedTo column to Task model
+  - Migration: 20260216201134_add_assigned_to
+
+### Technical
+- Added `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`
+- ThemeProvider component with context API
+- Updated Prisma schema and migrations
+- Enhanced API validation for assignedTo field
+
 ## [0.2.0] - 2026-02-16
 
 ### Added
@@ -99,15 +158,15 @@ All notable changes to the OpenClaw Dashboard will be documented in this file.
 
 ## Roadmap
 
-### v0.3.0 (Planned)
-- [ ] Drag-and-drop task reordering
-- [ ] Task assignment to agents
+### v0.4.0 (Planned)
 - [ ] Real-time collaboration via WebSockets
-- [ ] Export/import task data
-- [ ] Dark/light theme toggle
-- [ ] Advanced filtering and sorting
+- [ ] Task templates and duplication
+- [ ] Custom fields for tasks
+- [ ] Gantt chart view
+- [ ] Keyboard shortcuts
+- [ ] Task dependencies
 
-### v0.4.0 (Future)
+### v0.5.0 (Future)
 - [ ] Authentication system
 - [ ] Role-based access control
 - [ ] Multi-user support
