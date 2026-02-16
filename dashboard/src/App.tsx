@@ -1,6 +1,7 @@
 import Sidebar from './components/Sidebar';
 import KanbanBoard from './components/KanbanBoard';
 import TaskTemplates from './components/TaskTemplates';
+import GanttChart from './components/GanttChart';
 import WorkspaceExplorer from './components/WorkspaceExplorer';
 import UserManager from './components/UserManager';
 import ActivityLog from './components/ActivityLog';
@@ -188,6 +189,13 @@ function App() {
           <TabsContent value="Templates" className="mt-0 h-full w-full animate-in slide-in-from-bottom-4 duration-500 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
              <div className="p-8">
                 <TaskTemplates />
+             </div>
+          </TabsContent>
+
+          {/* TIMELINE TAB */}
+          <TabsContent value="Timeline" className="mt-0 h-full w-full animate-in slide-in-from-bottom-4 duration-500 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
+             <div className="p-8">
+                <GanttChart />
              </div>
           </TabsContent>
 
