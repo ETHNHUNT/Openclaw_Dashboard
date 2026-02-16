@@ -2,6 +2,54 @@
 
 All notable changes to the OpenClaw Dashboard will be documented in this file.
 
+## [0.4.0] - 2026-02-16
+
+### Added
+- **Task Templates** - Reusable task blueprints
+  - Create, edit, delete custom templates
+  - Quick task creation from templates
+  - Store template configurations (priority, status, description)
+  - Persistent localStorage storage
+  - Template management dashboard
+
+- **Keyboard Shortcuts** - Global keyboard navigation
+  - **Navigation:** M (Missions), A (Analytics), S (Settings), H (Systems)
+  - **Tasks:** N (New Task), D (Duplicate), E (Edit), Delete
+  - **Export/Import:** Ctrl+E (Export), Ctrl+I (Import)
+  - **General:** ? (Show shortcuts), Esc (Close dialogs)
+  - Visual keyboard shortcuts dialog with categories
+  - Smart detection (doesn't interfere with form inputs)
+
+- **Task Duplication** - Quickly copy existing tasks
+  - Duplicate button on each task card
+  - Copies title (with "Copy" suffix), description, priority
+  - Creates new task in Planning status
+  - Keyboard shortcut: D
+  - Visual feedback notification on duplicate
+
+- **KeyboardShortcutsDialog Component**
+  - Searchable, categorized shortcuts list
+  - Keyboard key styling
+  - Accessible via ? key or icon button
+  - Global reference guide
+
+### Enhanced
+- **Sidebar** - Added Templates navigation tab
+- **App.tsx** - Global keyboard event listener system
+- **Top Header** - Added keyboard shortcuts button next to notifications
+- **KanbanBoard** - Added duplicate button on task cards (left of delete button)
+
+### Technical
+- Global keyboard event system with navigation dispatch
+- Templates stored in localStorage (JSON)
+- Event-driven architecture for shortcuts
+- Keyboard state awareness (ignores when typing)
+
+### Bundle Size
+- **v0.3.0:** 435.23 kB (gzip: 127.80 kB)
+- **v0.4.0:** 448.37 kB (gzip: 130.39 kB)
+- **Increase:** +13.14 kB (+3%)
+
 ## [0.3.0] - 2026-02-16
 
 ### Added
@@ -158,21 +206,20 @@ All notable changes to the OpenClaw Dashboard will be documented in this file.
 
 ## Roadmap
 
-### v0.4.0 (Planned)
+### v0.5.0 (Planned)
 - [ ] Real-time collaboration via WebSockets
-- [ ] Task templates and duplication
 - [ ] Custom fields for tasks
 - [ ] Gantt chart view
-- [ ] Keyboard shortcuts
 - [ ] Task dependencies
+- [ ] Task comments with @mentions
+- [ ] Bulk operations (multi-select, bulk update)
 
-### v0.5.0 (Future)
+### v0.6.0 (Future)
 - [ ] Authentication system
 - [ ] Role-based access control
 - [ ] Multi-user support
-- [ ] Task templates
-- [ ] Custom fields
-- [ ] Gantt chart view
+- [ ] Activity audit trail
+- [ ] Task history/versioning
 
 ### v1.0.0 (Production)
 - [ ] Complete feature parity

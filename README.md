@@ -5,7 +5,10 @@ A modern, tactical mission control dashboard for OpenClaw AI operations. Built w
 ## 🚀 Features
 
 ### Core Functionality
-- **Drag-and-Drop Kanban** - Full drag-and-drop task management with touch support
+- **Mission Command Center** - Kanban-style task management with full drag-and-drop
+- **Task Templates** - Reusable task blueprints for quick creation
+- **Keyboard Shortcuts** - Global navigation and task management shortcuts
+- **Task Duplication** - Quickly copy existing tasks with one click
 - **Task Assignment** - Assign missions to specific agents
 - **Export/Import** - Data portability with JSON export/import
 - **Theme Switching** - Dark/Light/Auto modes with system preference detection
@@ -53,6 +56,23 @@ A modern, tactical mission control dashboard for OpenClaw AI operations. Built w
 - System health overview
 - Agent status monitoring
 - Clearance level display
+
+#### 📋 Templates Tab
+- Create and manage reusable task templates
+- Template configuration (title, description, priority, status)
+- Quick task creation from templates
+- Edit and delete existing templates
+- Search and filter templates
+- Perfect for recurring task types
+
+#### ⌨️ Keyboard Shortcuts
+- **Press `?` to open the shortcuts dialog**
+- **Navigation:** M (Missions), A (Analytics), S (Settings), H (Systems)
+- **Tasks:** N (New Task), D (Duplicate), E (Edit), Delete
+- **Export/Import:** Ctrl+E (Export), Ctrl+I (Import)
+- **General:** Esc (Close dialogs)
+- Smart detection - doesn't interfere with form inputs
+- Categorized, searchable shortcuts reference
 
 #### ⚙️ Settings Tab
 - **Appearance:** Theme selection (Dark/Light/Auto) with real-time switching
