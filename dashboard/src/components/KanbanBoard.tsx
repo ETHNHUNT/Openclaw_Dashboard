@@ -317,6 +317,7 @@ export default function KanbanBoard() {
                   <Button 
                     variant="outline" 
                     className="w-full py-6 border-dashed border-eth-700 text-eth-600 hover:border-eth-accent hover:text-eth-accent hover:bg-eth-800/50 transition-all font-semibold"
+                    onClick={() => setIsAddModalOpen(true)}
                   >
                     <Plus size={16} className="mr-2" /> ADD TASK
                   </Button>

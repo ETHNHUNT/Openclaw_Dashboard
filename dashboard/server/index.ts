@@ -2,11 +2,14 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import 'dotenv/config'; // Load env
+import os from 'os';
+import fs from 'fs/promises';
+import path from 'path';
+import prisma from './prisma';
+import { startHeartbeat } from './heartbeat';
 
-const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -15,12 +18,30 @@ app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
 
+// Serve static files from the 'public' folder in production
+if (process.env.NODE_ENV === 'production') {
+  const publicPath = path.join(process.cwd(), 'public');
+  app.use(express.static(publicPath));
+  
+  // Handle SPA routing
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(publicPath, 'index.html'));
+  });
+}
+
 // Zod Schemas
 const TaskSchema = z.object({
   title: z.string().min(1),
   desc: z.string().optional(),
   status: z.enum(['Planning', 'In Progress', 'Done']).optional(),
   priority: z.enum(['High', 'Medium', 'Low']).optional(),
+});
+
+const LogSchema = z.object({
+  level: z.enum(['info', 'warn', 'error', 'success']),
+  message: z.string().min(1),
+  module: z.string().min(1),
 });
 
 // Routes
@@ -109,20 +130,24 @@ app.get('/api/logs', async (req, res) => {
 // POST /api/logs
 app.post('/api/logs', async (req, res) => {
   try {
-    const { level, message, module } = req.body;
+    const data = LogSchema.parse(req.body);
     const log = await prisma.systemLog.create({
-      data: { level, message, module }
+      data: {
+        level: data.level,
+        message: data.message,
+        module: data.module
+      }
     });
     res.status(201).json(log);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to create log' });
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: (error as any).errors });
+    } else {
+      console.error(error);
+      res.status(500).json({ error: 'Failed to create log' });
+    }
   }
 });
-
-import os from 'os';
-
-// ... other routes ...
 
 // GET /api/health
 app.get('/api/health', (req, res) => {
@@ -143,11 +168,8 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-import fs from 'fs/promises';
-import path from 'path';
-
 // --- FILESYSTEM API ---
-const WORKSPACE_ROOT = '/home/codespace/.openclaw/workspace-main';
+const WORKSPACE_ROOT = '/home/codespace/.openclaw/workspace';
 
 // GET /api/files - List files in memory folder
 app.get('/api/files', async (req, res) => {
@@ -174,6 +196,10 @@ app.get('/api/files', async (req, res) => {
 app.get('/api/files/:name', async (req, res) => {
   try {
     const fileName = req.params.name;
+    // Basic path traversal protection
+    if (fileName.includes('..') || fileName.includes('/')) {
+      return res.status(400).json({ error: 'Invalid filename' });
+    }
     const filePath = path.join(WORKSPACE_ROOT, 'memory', fileName);
     const content = await fs.readFile(filePath, 'utf-8');
     res.json({ name: fileName, content });
@@ -183,6 +209,47 @@ app.get('/api/files/:name', async (req, res) => {
   }
 });
 
+// GET /api/agents - Parse MEMORY.md for team structure
+app.get('/api/agents', async (req, res) => {
+  try {
+    let content = '';
+    try {
+      content = await fs.readFile(path.join(WORKSPACE_ROOT, 'MEMORY.md'), 'utf-8');
+    } catch (e) {
+      console.warn('MEMORY.md not found in root, checking memory folder');
+      content = await fs.readFile(path.join(WORKSPACE_ROOT, 'memory', 'MEMORY.md'), 'utf-8');
+    }
+
+    const teamSection = content.split('## Team Structure (Locked)')[1]?.split('##')[0];
+    if (!teamSection) return res.json([]);
+
+    const agents = [];
+    const lines = teamSection.split('\n').map(l => l.trim()).filter(l => l.startsWith('- **'));
+    
+    for (const line of lines) {
+      // Regex to handle:
+      // - **FORGE** - Coding Specialist (grok-code-fast-1)
+      const match = line.match(/- \*\*(.+?)\*\*(?: \(me\))? - (.+) \((.+)\)/);
+      
+      if (match) {
+        agents.push({
+          id: match[1],
+          name: match[1],
+          role: match[2],
+          model: match[3],
+          status: 'Online',
+          avatar: ''
+        });
+      }
+    }
+    res.json(agents);
+  } catch (error) {
+    console.error(error);
+    res.json([]); 
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  startHeartbeat();
 });

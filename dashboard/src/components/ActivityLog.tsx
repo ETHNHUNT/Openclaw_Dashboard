@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Terminal } from 'lucide-react';
 
 interface LogEntry {
@@ -18,6 +18,7 @@ const levelColors = {
 
 export default function ActivityLog() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -25,7 +26,15 @@ export default function ActivityLog() {
         const res = await fetch('/api/logs');
         if (res.ok) {
           const data = await res.json();
-          setLogs(data);
+          // Sort by timestamp asc for log stream effect (oldest at top, newest at bottom)
+          // or desc (newest at top). 
+          // If we want "Live" feel, usually newest at bottom with auto-scroll is terminal style.
+          // The API returns desc (newest first). Let's reverse for terminal feel or keep as is.
+          // If we keep desc, no auto-scroll needed (newest at top).
+          // Let's stick to the current API order (desc) but maybe visual cue?
+          // Actually, terminal usually appends to bottom. 
+          // Let's reverse the data for display so newest is at the bottom.
+          setLogs(data.reverse());
         }
       } catch (err) {
         console.error("Log fetch failed", err);
@@ -35,6 +44,12 @@ export default function ActivityLog() {
     const interval = setInterval(fetchLogs, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [logs]);
 
   return (
     <div className="space-y-3 font-mono h-full flex flex-col">
@@ -46,7 +61,7 @@ export default function ActivityLog() {
         <div className="h-[1px] flex-1 bg-eth-700/50 mx-3" />
       </div>
 
-      <div className="flex-1 space-y-3 overflow-auto pr-2 custom-scrollbar">
+      <div ref={scrollRef} className="flex-1 space-y-3 overflow-auto pr-2 custom-scrollbar">
         {logs.map((log) => (
           <div key={log.id} className="text-[10px] leading-relaxed border-l border-eth-700/50 pl-3 relative group">
             <div className="absolute -left-[3px] top-1 w-[5px] h-[5px] rounded-full bg-eth-700 group-hover:bg-eth-accent transition-colors" />

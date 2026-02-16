@@ -8,6 +8,14 @@ interface HealthData {
   status: string;
 }
 
+interface LogEntry {
+  id: string;
+  timestamp: string;
+  module: string;
+  message: string;
+  level: 'info' | 'warn' | 'error' | 'success';
+}
+
 const statusConfig = {
   healthy: { color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', bar: 'bg-emerald-400' },
   warning: { color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/30', bar: 'bg-amber-400' },
@@ -16,21 +24,43 @@ const statusConfig = {
 
 export default function SystemHealth() {
   const [health, setHealth] = useState<HealthData | null>(null);
+  const [lastHeartbeat, setLastHeartbeat] = useState<LogEntry | null>(null);
+  const [isStale, setIsStale] = useState(false);
 
   useEffect(() => {
-    const fetchHealth = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch('/api/health');
-        if (res.ok) {
-          const data = await res.json();
+        const [healthRes, logsRes] = await Promise.all([
+          fetch('/api/health'),
+          fetch('/api/logs')
+        ]);
+
+        if (healthRes.ok) {
+          const data = await healthRes.json();
           setHealth(data);
         }
+
+        if (logsRes.ok) {
+          const logs = await logsRes.json();
+          const heartbeatLog = logs.find((l: LogEntry) => l.module === 'HEARTBEAT');
+          if (heartbeatLog) {
+            setLastHeartbeat(heartbeatLog);
+            const logTime = new Date(heartbeatLog.timestamp).getTime();
+            const now = new Date().getTime();
+            // Stale if last heartbeat was more than 75 seconds ago (runs every 30s)
+            setIsStale(now - logTime > 75000);
+          } else {
+            setIsStale(true);
+          }
+        }
       } catch (err) {
-        console.error("Health fetch failed", err);
+        console.error("Health/Logs fetch failed", err);
+        setIsStale(true);
       }
     };
-    fetchHealth();
-    const interval = setInterval(fetchHealth, 10000);
+    
+    fetchData();
+    const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -57,9 +87,23 @@ export default function SystemHealth() {
           </h2>
           <p className="text-xs text-eth-500 mt-1 uppercase tracking-widest font-mono">Real-time metrics</p>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
-          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-          <span className="text-[10px] font-bold text-emerald-400">OPERATIONAL</span>
+        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
+          isStale ? 'bg-amber-500/10 border-amber-500/30' : 
+          lastHeartbeat?.level === 'error' ? 'bg-rose-500/10 border-rose-500/30' : 
+          'bg-emerald-500/10 border-emerald-500/30'
+        }`}>
+          <div className={`w-2 h-2 rounded-full animate-pulse ${
+            isStale ? 'bg-amber-400' : 
+            lastHeartbeat?.level === 'error' ? 'bg-rose-400' : 
+            'bg-emerald-400'
+          }`} />
+          <span className={`text-[10px] font-bold ${
+            isStale ? 'text-amber-400' : 
+            lastHeartbeat?.level === 'error' ? 'text-rose-400' : 
+            'text-emerald-400'
+          }`}>
+            {isStale ? 'STALE' : lastHeartbeat?.level === 'error' ? 'INTERRUPTED' : 'OPERATIONAL'}
+          </span>
         </div>
       </div>
 
@@ -102,6 +146,23 @@ export default function SystemHealth() {
           <h3 className="text-xs font-bold text-white uppercase">Active Alerts</h3>
         </div>
         <div className="space-y-2">
+          {lastHeartbeat && (
+            <div className={`flex items-center justify-between p-3 rounded-lg border ${
+              lastHeartbeat.level === 'error' ? 'bg-rose-500/5 border-rose-500/20' : 'bg-eth-800 border-eth-700'
+            }`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-2 h-2 rounded-full ${
+                  lastHeartbeat.level === 'error' ? 'bg-rose-400' : 'bg-emerald-400'
+                }`} />
+                <span className={`text-xs ${lastHeartbeat.level === 'error' ? 'text-rose-300' : 'text-eth-300'}`}>
+                  Pulse: {lastHeartbeat.message}
+                </span>
+              </div>
+              <span className="text-[10px] text-eth-600 font-mono uppercase">
+                {new Date(lastHeartbeat.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          )}
           {(health?.memory || 0) > 65 && (
             <div className="flex items-center justify-between p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
               <div className="flex items-center gap-3">
