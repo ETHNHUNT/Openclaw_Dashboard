@@ -2,6 +2,44 @@
 
 All notable changes to the OpenClaw Dashboard will be documented in this file.
 
+## [0.5.0] - 2026-02-16
+
+### Added
+- **Gantt Chart Timeline** - Visual project timeline and scheduling
+  - Day/Week/Month view modes
+  - Color-coded by task status (Planning/In Progress/Done)
+  - Priority indicators (high/medium/low dots)
+  - Task duration visualization (date created to updated)
+  - Interactive hover tooltips
+  - Task statistics dashboard (total, completed, in progress, upcoming)
+  - Legend with status and priority indicators
+  - Grid overlay for accurate alignment
+  - Responsive horizontal scrolling
+
+### Features
+- Timeline automatically calculates task duration from created to updated dates
+- Multiple view scales for different planning horizons
+- Status summary cards (Total, Completed, In Progress, Upcoming)
+- Priority dots indicate task urgency at a glance
+- Date headers update based on selected view (day/week/month)
+
+### UI Updates
+- **Sidebar:** Added Timeline tab with Calendar icon
+- **Tab Navigation:** New Timeline tab between Templates and Memory
+- **Gantt Component:** 294 lines of visualization code
+
+### Technical
+- Day/Week/Month view calculations
+- Date range normalization
+- Task position calculation with visual mapping
+- Status and priority color coding
+- Canvas-friendly SVG-inspired design
+
+### Bundle Size
+- **v0.4.0:** 448.37 kB (gzip: 130.39 kB)
+- **v0.5.0:** 455.33 kB (gzip: 131.83 kB)
+- **Increase:** +6.96 kB (+1.5%)
+
 ## [0.4.0] - 2026-02-16
 
 ### Added

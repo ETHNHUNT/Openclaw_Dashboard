@@ -65,6 +65,17 @@ A modern, tactical mission control dashboard for OpenClaw AI operations. Built w
 - Search and filter templates
 - Perfect for recurring task types
 
+#### 📅 Timeline Tab (Gantt Chart)
+- Visual project timeline with multiple view modes
+- **View Modes:** Day (hourly), Week (daily), Month (daily)
+- **Color Coding:** Task status (Planning/In Progress/Done)
+- **Indicators:** Priority dots (High/Medium/Low)
+- Duration visualization (task lifespan)
+- Task statistics (Total, Completed, In Progress, Upcoming)
+- Interactive hover tooltips
+- Legend with color meanings
+- Perfect for project planning and scheduling
+
 #### ⌨️ Keyboard Shortcuts
 - **Press `?` to open the shortcuts dialog**
 - **Navigation:** M (Missions), A (Analytics), S (Settings), H (Systems)
