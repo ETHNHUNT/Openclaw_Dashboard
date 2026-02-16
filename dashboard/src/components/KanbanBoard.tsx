@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import TaskDetailModal from './TaskDetailModal';
 
 interface Task {
   id: string;
@@ -40,6 +41,8 @@ export default function KanbanBoard() {
   const [priorityFilter, setPriorityFilter] = useState('All');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', desc: '', priority: 'Medium' });
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const fetchTasks = async () => {
     try {
@@ -105,6 +108,11 @@ export default function KanbanBoard() {
     } catch (err) {
       console.error("Advance failed", err);
     }
+  };
+
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    setIsDetailModalOpen(true);
   };
 
   const filteredTasks = tasks.filter(task => {
@@ -256,6 +264,7 @@ export default function KanbanBoard() {
                     .map((task) => (
                       <Card 
                         key={task.id}
+                        onClick={() => handleTaskClick(task)}
                         className={`${priorityBgColors[task.priority] || priorityBgColors['Medium']} bg-eth-800 border border-eth-700 hover:border-eth-accent/50 hover:shadow-eth-md transition-all group cursor-pointer`}
                       >
                         <CardHeader className="p-5 pb-3 space-y-3">
@@ -327,6 +336,14 @@ export default function KanbanBoard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* TASK DETAIL MODAL */}
+      <TaskDetailModal
+        task={selectedTask}
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        onRefresh={fetchTasks}
+      />
     </div>
   );
 }

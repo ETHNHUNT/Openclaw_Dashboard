@@ -44,6 +44,11 @@ const LogSchema = z.object({
   module: z.string().min(1),
 });
 
+const CommentSchema = z.object({
+  text: z.string().min(1),
+  taskId: z.string(),
+});
+
 // Routes
 
 // GET /api/tasks
@@ -246,6 +251,57 @@ app.get('/api/agents', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.json([]); 
+  }
+});
+
+// --- COMMENTS API ---
+
+// GET /api/tasks/:id/comments
+app.get('/api/tasks/:id/comments', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const comments = await prisma.comment.findMany({
+      where: { taskId: id },
+      orderBy: { createdAt: 'asc' },
+    });
+    res.json(comments);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch comments' });
+  }
+});
+
+// POST /api/tasks/:id/comments
+app.post('/api/tasks/:id/comments', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const data = CommentSchema.parse(req.body);
+    const comment = await prisma.comment.create({
+      data: {
+        text: data.text,
+        taskId: id,
+      }
+    });
+    res.status(201).json(comment);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: (error as any).errors });
+    } else {
+      console.error(error);
+      res.status(500).json({ error: 'Failed to create comment' });
+    }
+  }
+});
+
+// DELETE /api/comments/:id
+app.delete('/api/comments/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.comment.delete({ where: { id } });
+    res.status(204).send();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to delete comment' });
   }
 });
 

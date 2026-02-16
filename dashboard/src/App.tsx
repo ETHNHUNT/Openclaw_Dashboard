@@ -4,7 +4,10 @@ import WorkspaceExplorer from './components/WorkspaceExplorer';
 import UserManager from './components/UserManager';
 import ActivityLog from './components/ActivityLog';
 import SystemHealth from './components/SystemHealth';
-import { Search, Bell, Shield, Activity } from 'lucide-react';
+import Settings from './components/Settings';
+import Analytics from './components/Analytics';
+import NotificationCenter from './components/NotificationCenter';
+import { Search, Shield } from 'lucide-react';
 import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Avatar } from "@/components/ui/avatar"
@@ -30,10 +33,7 @@ function App() {
 
           <div className="flex items-center gap-6">
             <div className="flex gap-4">
-              <Button variant="ghost" size="icon" className="text-eth-500 hover:text-white relative hover:bg-eth-800">
-                <Bell size={20} />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse-eth" />
-              </Button>
+              <NotificationCenter />
               <Button variant="ghost" size="icon" className="text-eth-500 hover:text-white hover:bg-eth-800">
                 <Shield size={20} />
               </Button>
@@ -108,6 +108,11 @@ function App() {
             </div>
           </TabsContent>
 
+          {/* ANALYTICS TAB */}
+          <TabsContent value="Analytics" className="mt-0 h-full w-full animate-in slide-in-from-bottom-4 duration-500 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
+            <Analytics />
+          </TabsContent>
+
           {/* SYSTEMS TAB */}
           <TabsContent value="Systems" className="mt-0 h-full w-full flex animate-in slide-in-from-bottom-4 duration-500 data-[state=inactive]:hidden focus-visible:outline-none p-8">
              <div className="max-w-4xl mx-auto w-full">
@@ -123,10 +128,8 @@ function App() {
               </div>
           </TabsContent>
           
-          <TabsContent value="Settings" className="mt-0 h-full animate-in slide-in-from-bottom-4 duration-500 data-[state=inactive]:hidden focus-visible:outline-none">
-             <div className="flex items-center justify-center h-64 text-eth-600 font-mono text-xs tracking-widest">
-                SETTINGS_MODULE_LOCKED // UNDER_CONSTRUCTION
-             </div>
+          <TabsContent value="Settings" className="mt-0 h-full animate-in slide-in-from-bottom-4 duration-500 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
+             <Settings />
           </TabsContent>
         </div>
       </main>
