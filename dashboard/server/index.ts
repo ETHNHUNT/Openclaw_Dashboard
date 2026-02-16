@@ -36,6 +36,7 @@ const TaskSchema = z.object({
   desc: z.string().optional(),
   status: z.enum(['Planning', 'In Progress', 'Done']).optional(),
   priority: z.enum(['High', 'Medium', 'Low']).optional(),
+  assignedTo: z.string().optional(),
 });
 
 const LogSchema = z.object({
@@ -75,6 +76,7 @@ app.post('/api/tasks', async (req, res) => {
         desc: data.desc || null,
         status: data.status || 'Planning',
         priority: data.priority || 'Medium',
+        assignedTo: data.assignedTo || null,
       }
     });
     res.status(201).json(task);

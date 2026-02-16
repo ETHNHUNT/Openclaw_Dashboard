@@ -7,10 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useTheme } from './ThemeProvider';
 
 export default function Settings() {
+  const { theme, setTheme } = useTheme();
   const [settings, setSettings] = useState({
-    theme: 'dark',
     notifications: true,
     soundEnabled: false,
     autoRefresh: true,
@@ -32,7 +33,6 @@ export default function Settings() {
 
   const handleReset = () => {
     const defaults = {
-      theme: 'dark',
       notifications: true,
       soundEnabled: false,
       autoRefresh: true,
@@ -43,6 +43,7 @@ export default function Settings() {
       heartbeatInterval: 30,
     };
     setSettings(defaults);
+    setTheme('dark');
     localStorage.removeItem('dashboard_settings');
   };
 
@@ -101,7 +102,7 @@ export default function Settings() {
                   <Label className="text-white text-sm">Theme</Label>
                   <p className="text-xs text-eth-500 mt-1">Select your preferred color scheme</p>
                 </div>
-                <Select value={settings.theme} onValueChange={(v) => setSettings({...settings, theme: v})}>
+                <Select value={theme} onValueChange={(v: any) => setTheme(v)}>
                   <SelectTrigger className="w-[180px] bg-eth-800 border-eth-700 text-white">
                     <SelectValue />
                   </SelectTrigger>
