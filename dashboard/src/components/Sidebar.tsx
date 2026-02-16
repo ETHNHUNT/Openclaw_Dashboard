@@ -1,9 +1,10 @@
-import { Search, Home, FileText, Settings, Zap, Shield, Database, BarChart3 } from 'lucide-react';
+import { Search, Home, FileText, Settings, Zap, Shield, Database, BarChart3, Copy } from 'lucide-react';
 import { TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const navItems = [
   { icon: Home, label: 'Dashboard' },
   { icon: FileText, label: 'Missions' },
+  { icon: Copy, label: 'Templates' },
   { icon: Database, label: 'Memory' },
   { icon: BarChart3, label: 'Analytics' },
   { icon: Shield, label: 'Security' },

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MoreVertical, Plus, Layers, MessageSquare, Search, Trash2, GripVertical, Download, Upload } from 'lucide-react';
+import { MoreVertical, Plus, Layers, MessageSquare, Search, Trash2, GripVertical, Download, Upload, Copy as CopyIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -55,10 +55,11 @@ const priorityBgColors: Record<string, string> = {
 interface SortableTaskCardProps {
   task: Task;
   onDelete: (id: string) => void;
+  onDuplicate: (task: Task) => void;
   onClick: (task: Task) => void;
 }
 
-function SortableTaskCard({ task, onDelete, onClick }: SortableTaskCardProps) {
+function SortableTaskCard({ task, onDelete, onDuplicate, onClick }: SortableTaskCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
 
   const style = {
@@ -110,17 +111,32 @@ function SortableTaskCard({ task, onDelete, onClick }: SortableTaskCardProps) {
             </div>
           </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-eth-600 hover:text-red-400 hover:bg-red-400/10"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(task.id);
-            }}
-          >
-            <Trash2 size={14} />
-          </Button>
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-eth-600 hover:text-eth-accent hover:bg-eth-accent/10"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDuplicate(task);
+              }}
+              title="Duplicate task (D)"
+            >
+              <CopyIcon size={14} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-eth-600 hover:text-red-400 hover:bg-red-400/10"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(task.id);
+              }}
+              title="Delete task"
+            >
+              <Trash2 size={14} />
+            </Button>
+          </div>
         </div>
       </Card>
     </div>
@@ -203,6 +219,30 @@ export default function KanbanBoard() {
       fetchTasks();
     } catch (err) {
       console.error('Delete failed', err);
+    }
+  };
+
+  const handleDuplicateTask = async (task: Task) => {
+    try {
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: `${task.title} (Copy)`,
+          desc: task.desc,
+          priority: task.priority,
+          assignedTo: task.assignedTo,
+          status: 'Planning',
+        }),
+      });
+      if (res.ok) {
+        fetchTasks();
+        window.dispatchEvent(new CustomEvent('notification', {
+          detail: { type: 'success', message: `Task duplicated: ${task.title}` }
+        }));
+      }
+    } catch (err) {
+      console.error('Duplication failed', err);
     }
   };
 
@@ -527,6 +567,7 @@ export default function KanbanBoard() {
                             key={task.id}
                             task={task}
                             onDelete={handleDeleteTask}
+                            onDuplicate={handleDuplicateTask}
                             onClick={handleTaskClick}
                           />
                         ))}

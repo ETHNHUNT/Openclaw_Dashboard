@@ -1,5 +1,6 @@
 import Sidebar from './components/Sidebar';
 import KanbanBoard from './components/KanbanBoard';
+import TaskTemplates from './components/TaskTemplates';
 import WorkspaceExplorer from './components/WorkspaceExplorer';
 import UserManager from './components/UserManager';
 import ActivityLog from './components/ActivityLog';
@@ -7,6 +8,7 @@ import SystemHealth from './components/SystemHealth';
 import Settings from './components/Settings';
 import Analytics from './components/Analytics';
 import NotificationCenter from './components/NotificationCenter';
+import KeyboardShortcutsDialog from './components/KeyboardShortcutsDialog';
 import DashboardOverview from './components/DashboardOverview';
 import RecentActivityFeed from './components/RecentActivityFeed';
 import { Search, Shield } from 'lucide-react';
@@ -14,8 +16,88 @@ import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Avatar } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { useEffect, useRef } from 'react';
 
 function App() {
+  const tabsRef = useRef<any>(null);
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Only handle if not typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      // Navigation shortcuts
+      if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+        switch (e.key.toLowerCase()) {
+          case '?':
+            e.preventDefault();
+            // Trigger keyboard shortcuts dialog
+            const shortcutsBtn = document.querySelector('[title="Keyboard shortcuts (Press ?)"]') as HTMLButtonElement;
+            shortcutsBtn?.click();
+            break;
+          case 'm':
+            e.preventDefault();
+            window.dispatchEvent(new CustomEvent('navigate', { detail: 'Missions' }));
+            break;
+          case 'a':
+            e.preventDefault();
+            window.dispatchEvent(new CustomEvent('navigate', { detail: 'Analytics' }));
+            break;
+          case 's':
+            e.preventDefault();
+            window.dispatchEvent(new CustomEvent('navigate', { detail: 'Settings' }));
+            break;
+          case 'h':
+            e.preventDefault();
+            window.dispatchEvent(new CustomEvent('navigate', { detail: 'Systems' }));
+            break;
+          case 'n':
+            e.preventDefault();
+            // Trigger new task modal
+            const newTaskBtn = Array.from(document.querySelectorAll('button')).find(btn => btn.textContent?.includes('NEW TASK')) as HTMLButtonElement;
+            newTaskBtn?.click();
+            break;
+          case 'escape':
+            // Close any open dialogs - handled by shadcn/ui
+            break;
+        }
+      }
+
+      // Export/Import shortcuts
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key.toLowerCase()) {
+          case 'e':
+            e.preventDefault();
+            const exportBtn = Array.from(document.querySelectorAll('button')).find(btn => btn.getAttribute('title')?.includes('Export')) as HTMLButtonElement;
+            exportBtn?.click();
+            break;
+          case 'i':
+            e.preventDefault();
+            const importBtn = Array.from(document.querySelectorAll('button')).find(btn => btn.getAttribute('title')?.includes('Import')) as HTMLButtonElement;
+            importBtn?.click();
+            break;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    
+    // Listen for navigation events
+    const handleNavigate = (e: any) => {
+      const tabValue = e.detail;
+      const tabTrigger = Array.from(document.querySelectorAll('[role="tab"]')).find(tab => tab.textContent?.trim() === tabValue) as HTMLButtonElement;
+      tabTrigger?.click();
+    };
+
+    window.addEventListener('navigate', handleNavigate);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener('navigate', handleNavigate);
+    };
+  }, []);
   return (
     <Tabs defaultValue="Dashboard" className="flex min-h-screen bg-eth-950 text-eth-300" orientation="vertical">
       <Sidebar />
@@ -35,6 +117,7 @@ function App() {
 
           <div className="flex items-center gap-6">
             <div className="flex gap-4">
+              <KeyboardShortcutsDialog />
               <NotificationCenter />
               <Button variant="ghost" size="icon" className="text-eth-500 hover:text-white hover:bg-eth-800">
                 <Shield size={20} />
@@ -98,6 +181,13 @@ function App() {
              </div>
              <div className="flex-1 p-8 overflow-auto">
                 <KanbanBoard />
+             </div>
+          </TabsContent>
+
+          {/* TEMPLATES TAB */}
+          <TabsContent value="Templates" className="mt-0 h-full w-full animate-in slide-in-from-bottom-4 duration-500 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
+             <div className="p-8">
+                <TaskTemplates />
              </div>
           </TabsContent>
 
