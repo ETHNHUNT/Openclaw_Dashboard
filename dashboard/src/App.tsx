@@ -12,10 +12,9 @@ import NotificationCenter from './components/NotificationCenter';
 import KeyboardShortcutsDialog from './components/KeyboardShortcutsDialog';
 import DashboardOverview from './components/DashboardOverview';
 import RecentActivityFeed from './components/RecentActivityFeed';
-import { Search, Shield } from 'lucide-react';
+import { Search, Bell } from 'lucide-react';
 import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
-import { Avatar } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { useEffect, useRef } from 'react';
 
@@ -34,7 +33,6 @@ function App() {
         switch (e.key.toLowerCase()) {
           case '?':
             e.preventDefault();
-            // Trigger keyboard shortcuts dialog
             const shortcutsBtn = document.querySelector('[title="Keyboard shortcuts (Press ?)"]') as HTMLButtonElement;
             shortcutsBtn?.click();
             break;
@@ -56,12 +54,10 @@ function App() {
             break;
           case 'n':
             e.preventDefault();
-            // Trigger new task modal
             const newTaskBtn = Array.from(document.querySelectorAll('button')).find(btn => btn.textContent?.includes('NEW TASK')) as HTMLButtonElement;
             newTaskBtn?.click();
             break;
           case 'escape':
-            // Close any open dialogs - handled by shadcn/ui
             break;
         }
       }
@@ -99,70 +95,46 @@ function App() {
       window.removeEventListener('navigate', handleNavigate);
     };
   }, []);
+
   return (
-    <Tabs defaultValue="Dashboard" className="flex min-h-screen bg-eth-950 text-eth-300" orientation="vertical">
+    <Tabs defaultValue="Dashboard" className="flex min-h-screen bg-background text-foreground" orientation="vertical">
       <Sidebar />
       
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="h-16 bg-eth-900/80 border-b border-eth-700 px-8 flex items-center justify-between shrink-0 backdrop-blur z-20">
+        <header className="h-14 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border px-6 flex items-center justify-between shrink-0 z-20">
           <div className="flex items-center gap-4 flex-1">
-            <div className="relative w-96">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-eth-500" size={16} />
-              <Input 
-                placeholder="Search missions, data, or logs..."
-                className="pl-10 h-9 bg-eth-800 border-eth-700 rounded-full text-sm text-white focus-visible:ring-eth-accent placeholder:text-eth-500"
-              />
-            </div>
+            <h2 className="text-sm font-semibold">Dashboard</h2>
           </div>
 
-          <div className="flex items-center gap-6">
-            <div className="flex gap-4">
-              <KeyboardShortcutsDialog />
-              <NotificationCenter />
-              <Button variant="ghost" size="icon" className="text-eth-500 hover:text-white hover:bg-eth-800">
-                <Shield size={20} />
-              </Button>
+          <div className="flex items-center gap-2">
+             <div className="relative w-64 mr-2">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input 
+                placeholder="Search..."
+                className="pl-9 h-8 bg-muted/50 border-transparent focus:bg-background focus:border-input text-sm"
+              />
             </div>
-            
-            <div className="h-8 w-[1px] bg-eth-700" />
-
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-sm font-bold text-white leading-none uppercase tracking-tight">VIPIN</p>
-                <p className="text-[10px] text-eth-accent font-mono tracking-tighter uppercase">Level 4 Clearance</p>
-              </div>
-              <Avatar className="h-9 w-9 bg-gradient-to-br from-eth-accent to-cyan-600 rounded-lg flex items-center justify-center text-eth-950 font-bold text-lg cursor-pointer hover:opacity-90 transition-opacity">
-                V
-              </Avatar>
-            </div>
+            <KeyboardShortcutsDialog />
+            <NotificationCenter />
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+              <Bell className="h-4 w-4" />
+            </Button>
           </div>
         </header>
 
         {/* Dashboard Content */}
-        <div className="flex-1 overflow-hidden bg-eth-950">
+        <div className="flex-1 overflow-hidden bg-muted/30 p-6">
           {/* DASHBOARD TAB */}
-          <TabsContent value="Dashboard" className="mt-0 h-full w-full animate-in fade-in duration-500 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
-            <div className="p-8 space-y-8">
-              {/* OVERVIEW METRICS */}
+          <TabsContent value="Dashboard" className="mt-0 h-full w-full animate-in fade-in duration-300 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
+            <div className="max-w-7xl mx-auto space-y-6">
               <DashboardOverview />
 
-              {/* MAIN CONTENT GRID */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* LEFT: Agent Squad */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="space-y-6">
-                  <h2 className="text-sm font-bold text-eth-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                    <Shield className="text-eth-accent" size={14} />
-                    Active Agents
-                  </h2>
                   <UserManager />
                 </div>
-
-                {/* CENTER: Recent Activity */}
                 <div className="lg:col-span-2 space-y-6">
-                  <h2 className="text-sm font-bold text-eth-500 uppercase tracking-[0.2em]">
-                    Recent Activity
-                  </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <RecentActivityFeed />
                     <div className="space-y-6">
@@ -176,61 +148,65 @@ function App() {
           </TabsContent>
 
           {/* MISSIONS TAB */}
-          <TabsContent value="Missions" className="mt-0 h-full w-full flex animate-in slide-in-from-bottom-4 duration-500 data-[state=inactive]:hidden focus-visible:outline-none">
-             <div className="w-80 border-r border-eth-700/50 p-6 overflow-auto shrink-0 bg-eth-900/20">
+          <TabsContent value="Missions" className="mt-0 h-full w-full flex animate-in fade-in duration-300 data-[state=inactive]:hidden focus-visible:outline-none">
+             <div className="w-72 border-r border-border p-4 overflow-auto shrink-0 bg-background">
                 <UserManager />
              </div>
-             <div className="flex-1 p-8 overflow-auto">
+             <div className="flex-1 p-6 overflow-auto">
                 <KanbanBoard />
              </div>
           </TabsContent>
 
           {/* TEMPLATES TAB */}
-          <TabsContent value="Templates" className="mt-0 h-full w-full animate-in slide-in-from-bottom-4 duration-500 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
-             <div className="p-8">
+          <TabsContent value="Templates" className="mt-0 h-full w-full animate-in fade-in duration-300 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
+             <div className="max-w-6xl mx-auto">
                 <TaskTemplates />
              </div>
           </TabsContent>
 
           {/* TIMELINE TAB */}
-          <TabsContent value="Timeline" className="mt-0 h-full w-full animate-in slide-in-from-bottom-4 duration-500 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
-             <div className="p-8">
+          <TabsContent value="Timeline" className="mt-0 h-full w-full animate-in fade-in duration-300 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
+             <div className="max-w-full">
                 <GanttChart />
              </div>
           </TabsContent>
 
           {/* MEMORY TAB */}
-          <TabsContent value="Memory" className="mt-0 h-full w-full flex animate-in slide-in-from-bottom-4 duration-500 data-[state=inactive]:hidden focus-visible:outline-none">
-            <div className="w-80 border-r border-eth-700/50 p-6 overflow-auto shrink-0 bg-eth-900/20">
+          <TabsContent value="Memory" className="mt-0 h-full w-full flex animate-in fade-in duration-300 data-[state=inactive]:hidden focus-visible:outline-none">
+            <div className="w-72 border-r border-border p-4 overflow-auto shrink-0 bg-background">
                <UserManager />
             </div>
-            <div className="flex-1 p-8 overflow-auto">
+            <div className="flex-1 p-6 overflow-auto">
               <WorkspaceExplorer />
             </div>
           </TabsContent>
 
           {/* ANALYTICS TAB */}
-          <TabsContent value="Analytics" className="mt-0 h-full w-full animate-in slide-in-from-bottom-4 duration-500 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
-            <Analytics />
+          <TabsContent value="Analytics" className="mt-0 h-full w-full animate-in fade-in duration-300 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
+            <div className="max-w-7xl mx-auto">
+              <Analytics />
+            </div>
           </TabsContent>
 
           {/* SYSTEMS TAB */}
-          <TabsContent value="Systems" className="mt-0 h-full w-full flex animate-in slide-in-from-bottom-4 duration-500 data-[state=inactive]:hidden focus-visible:outline-none p-8">
+          <TabsContent value="Systems" className="mt-0 h-full w-full animate-in fade-in duration-300 data-[state=inactive]:hidden focus-visible:outline-none">
              <div className="max-w-4xl mx-auto w-full">
                 <SystemHealth />
              </div>
           </TabsContent>
           
            {/* SECURITY TAB */}
-           <TabsContent value="Security" className="mt-0 h-full w-full flex animate-in slide-in-from-bottom-4 duration-500 data-[state=inactive]:hidden focus-visible:outline-none p-8">
-             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full h-fit">
+           <TabsContent value="Security" className="mt-0 h-full w-full animate-in fade-in duration-300 data-[state=inactive]:hidden focus-visible:outline-none">
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-6xl mx-auto">
                 <SystemHealth />
                 <UserManager />
               </div>
           </TabsContent>
           
-          <TabsContent value="Settings" className="mt-0 h-full animate-in slide-in-from-bottom-4 duration-500 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
-             <Settings />
+          <TabsContent value="Settings" className="mt-0 h-full animate-in fade-in duration-300 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
+             <div className="max-w-4xl mx-auto">
+                <Settings />
+             </div>
           </TabsContent>
         </div>
       </main>

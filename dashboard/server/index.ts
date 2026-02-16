@@ -13,10 +13,22 @@ import { startHeartbeat } from './heartbeat';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+console.log('Server starting...'); // Debug log
+
 app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
+
+// GET / (Health Check Root)
+app.get('/', (req, res) => {
+  res.json({
+    message: 'OpenClaw Dashboard API',
+    status: 'running',
+    docs: '/api/health',
+    version: '0.6.0'
+  });
+});
 
 // Serve static files from the 'public' folder in production
 if (process.env.NODE_ENV === 'production') {

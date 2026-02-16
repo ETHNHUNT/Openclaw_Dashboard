@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { X, MessageSquare, Send, Trash2, Clock, User } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { X, MessageSquare, Send, Trash2, Clock, User, CheckCircle2, AlertCircle, Calendar } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface Task {
   id: string;
@@ -14,6 +16,7 @@ interface Task {
   priority: string;
   createdAt: string;
   updatedAt: string;
+  assignedTo?: string | null;
 }
 
 interface Comment {
@@ -31,9 +34,15 @@ interface TaskDetailModalProps {
 }
 
 const priorityColors: Record<string, string> = {
-  High: 'bg-red-500/20 text-red-300 border-red-500/30',
-  Medium: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  Low: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+  High: 'bg-destructive/10 text-destructive border-destructive/20',
+  Medium: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+  Low: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+};
+
+const statusColors: Record<string, string> = {
+  Planning: 'bg-muted text-muted-foreground border-border',
+  'In Progress': 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+  Done: 'bg-green-500/10 text-green-500 border-green-500/20',
 };
 
 export default function TaskDetailModal({ task, isOpen, onClose, onRefresh }: TaskDetailModalProps) {
@@ -105,117 +114,127 @@ export default function TaskDetailModal({ task, isOpen, onClose, onRefresh }: Ta
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] bg-eth-900 border-eth-700 text-white overflow-hidden flex flex-col p-0">
-        <DialogHeader className="p-6 border-b border-eth-700 bg-eth-900/80 backdrop-blur shrink-0">
+      <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden bg-background border-border shadow-lg sm:rounded-xl">
+        <DialogHeader className="p-6 pb-4 border-b border-border bg-muted/10">
           <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <Badge variant="outline" className={`${priorityColors[task.priority]} text-xs font-bold px-3 py-1`}>
-                  {task.priority.toUpperCase()}
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className={`${priorityColors[task.priority]} font-medium border px-2 py-0.5 text-[10px] uppercase tracking-wider`}>
+                  {task.priority}
                 </Badge>
-                <Badge variant="outline" className="border-eth-600 text-eth-400 text-xs px-3 py-1">
+                <Badge variant="outline" className={`${statusColors[task.status]} font-medium border px-2 py-0.5 text-[10px] uppercase tracking-wider`}>
                   {task.status}
                 </Badge>
               </div>
-              <DialogTitle className="text-2xl font-bold text-white leading-tight">
+              <DialogTitle className="text-xl font-semibold tracking-tight text-foreground">
                 {task.title}
               </DialogTitle>
-              <p className="text-xs text-eth-500 mt-2 font-mono">ID: {task.id}</p>
             </div>
-            <Button variant="ghost" size="icon" onClick={onClose} className="text-eth-600 hover:text-white shrink-0">
-              <X size={20} />
-            </Button>
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-auto p-6 space-y-6">
-          {/* DESCRIPTION */}
-          <div>
-            <h3 className="text-sm font-bold text-eth-accent uppercase tracking-widest mb-3">Description</h3>
-            <p className="text-eth-300 text-sm leading-relaxed">
-              {task.desc || 'No description provided.'}
-            </p>
-          </div>
-
-          <Separator className="bg-eth-700" />
-
-          {/* METADATA */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-3 p-3 bg-eth-800/50 rounded-lg border border-eth-700/50">
-              <Clock className="text-eth-accent" size={18} />
-              <div>
-                <p className="text-[10px] text-eth-500 uppercase tracking-widest mb-0.5">Created</p>
-                <p className="text-sm text-white font-medium">{formatDate(task.createdAt)}</p>
+        <div className="flex flex-col md:flex-row h-[600px]">
+          {/* Main Content */}
+          <div className="flex-1 p-6 overflow-y-auto border-r border-border">
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Description</h3>
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                  {task.desc || <span className="text-muted-foreground italic">No description provided.</span>}
+                </p>
               </div>
-            </div>
-            <div className="flex items-center gap-3 p-3 bg-eth-800/50 rounded-lg border border-eth-700/50">
-              <Clock className="text-eth-accent" size={18} />
-              <div>
-                <p className="text-[10px] text-eth-500 uppercase tracking-widest mb-0.5">Last Updated</p>
-                <p className="text-sm text-white font-medium">{formatDate(task.updatedAt)}</p>
-              </div>
-            </div>
-          </div>
 
-          <Separator className="bg-eth-700" />
-
-          {/* COMMENTS */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <MessageSquare className="text-eth-accent" size={18} />
-              <h3 className="text-sm font-bold text-white uppercase tracking-widest">
-                Comments ({comments.length})
-              </h3>
-            </div>
-
-            <div className="space-y-3 mb-4 max-h-[300px] overflow-auto pr-2">
-              {comments.length === 0 ? (
-                <p className="text-eth-500 text-sm text-center py-8 italic">No comments yet. Be the first to comment!</p>
-              ) : (
-                comments.map((comment) => (
-                  <div key={comment.id} className="bg-eth-800/50 rounded-lg border border-eth-700/50 p-4 group hover:border-eth-accent/30 transition-colors">
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-eth-accent/20 rounded-full flex items-center justify-center">
-                          <User className="text-eth-accent" size={14} />
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-white">VIPIN</p>
-                          <p className="text-[10px] text-eth-500 font-mono">{formatDate(comment.createdAt)}</p>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteComment(comment.id)}
-                        className="h-7 w-7 text-eth-600 hover:text-red-400 hover:bg-red-400/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 size={14} />
-                      </Button>
-                    </div>
-                    <p className="text-sm text-eth-300 leading-relaxed pl-10">{comment.text}</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 rounded-lg bg-muted/30 border border-border/50">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="text-xs font-medium text-muted-foreground">Created</span>
                   </div>
-                ))
+                  <p className="text-sm font-medium">{formatDate(task.createdAt)}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/30 border border-border/50">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="text-xs font-medium text-muted-foreground">Updated</span>
+                  </div>
+                  <p className="text-sm font-medium">{formatDate(task.updatedAt)}</p>
+                </div>
+              </div>
+
+              {task.assignedTo && (
+                <div className="p-3 rounded-lg bg-muted/30 border border-border/50 flex items-center gap-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                      {task.assignedTo.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground">Assigned to</p>
+                    <p className="text-sm font-medium text-foreground">{task.assignedTo}</p>
+                  </div>
+                </div>
               )}
             </div>
+          </div>
 
-            {/* ADD COMMENT */}
-            <div className="space-y-3">
-              <Textarea
-                placeholder="Add a comment..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="bg-eth-800 border-eth-700 text-white placeholder:text-eth-500 focus-visible:ring-eth-accent resize-none"
-                rows={3}
-              />
-              <div className="flex justify-end">
+          {/* Sidebar / Comments */}
+          <div className="w-full md:w-80 bg-muted/5 flex flex-col">
+            <div className="p-4 border-b border-border bg-muted/10">
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-muted-foreground" />
+                Activity
+                <span className="ml-auto text-xs font-normal text-muted-foreground">{comments.length} comments</span>
+              </h3>
+            </div>
+            
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-4">
+                {comments.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p className="text-xs">No activity yet</p>
+                  </div>
+                ) : (
+                  comments.map((comment) => (
+                    <div key={comment.id} className="group flex gap-3">
+                      <Avatar className="h-6 w-6 mt-1 shrink-0">
+                        <AvatarFallback className="text-[10px] bg-primary/10 text-primary">VN</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium">Vipin</span>
+                          <span className="text-[10px] text-muted-foreground">{formatDate(comment.createdAt)}</span>
+                        </div>
+                        <p className="text-xs text-foreground/90 leading-relaxed bg-muted/50 p-2 rounded-md rounded-tl-none">
+                          {comment.text}
+                        </p>
+                        <button 
+                          onClick={() => handleDeleteComment(comment.id)}
+                          className="text-[10px] text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+
+            <div className="p-4 border-t border-border bg-background">
+              <div className="relative">
+                <Textarea
+                  placeholder="Write a comment..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  className="min-h-[80px] pr-10 resize-none text-sm bg-muted/30 focus:bg-background transition-colors"
+                />
                 <Button
-                  onClick={handleAddComment}
+                  size="icon"
+                  className="absolute bottom-2 right-2 h-7 w-7"
                   disabled={!newComment.trim() || loading}
-                  className="bg-eth-accent text-eth-950 font-bold hover:bg-eth-accent/90"
+                  onClick={handleAddComment}
                 >
-                  <Send size={16} className="mr-2" />
-                  {loading ? 'Posting...' : 'Post Comment'}
+                  <Send className="h-3.5 w-3.5" />
                 </Button>
               </div>
             </div>
