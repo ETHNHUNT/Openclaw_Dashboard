@@ -7,8 +7,12 @@ import 'dotenv/config'; // Load env
 import os from 'os';
 import fs from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import prisma from './prisma';
 import { startHeartbeat } from './heartbeat';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -31,14 +35,15 @@ app.get('/', (req, res) => {
 });
 
 // Serve static files from the 'public' folder in production
-if (process.env.NODE_ENV === 'production') {
-  const publicPath = path.join(process.cwd(), 'public');
-  app.use(express.static(publicPath));
+if (process.env.NODE_ENV === 'production' || process.env.CODESPACES === 'true') {
+  // Point to the frontend build folder (../dist relative to server/)
+  const distPath = path.join(__dirname, '../dist');
+  app.use(express.static(distPath));
   
-  // Handle SPA routing
+  // Handle SPA routing for any request that isn't an API call
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
-    res.sendFile(path.join(publicPath, 'index.html'));
+    res.sendFile(path.join(distPath, 'index.html'));
   });
 }
 

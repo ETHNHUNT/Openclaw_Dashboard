@@ -12,6 +12,8 @@ import NotificationCenter from './components/NotificationCenter';
 import KeyboardShortcutsDialog from './components/KeyboardShortcutsDialog';
 import DashboardOverview from './components/DashboardOverview';
 import RecentActivityFeed from './components/RecentActivityFeed';
+import DottedGlowBackground from './components/DottedGlowBackground';
+import MobileNav from './components/MobileNav';
 import { Search, Bell } from 'lucide-react';
 import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
@@ -97,15 +99,28 @@ function App() {
   }, []);
 
   return (
-    <Tabs defaultValue="Dashboard" className="flex min-h-screen bg-background text-foreground" orientation="vertical">
-      <Sidebar />
+    <div className="relative min-h-screen bg-background text-foreground overflow-hidden selection:bg-primary/20">
+      {/* Premium Background Effect */}
+      <DottedGlowBackground 
+        className="absolute inset-0 z-0 pointer-events-none"
+        gap={24}
+        radius={1.5}
+        color="rgba(124, 58, 237, 0.05)"
+        glowColor="rgba(139, 92, 246, 0.4)"
+        speedMin={0.2}
+        speedMax={0.8}
+      />
       
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Header */}
-        <header className="h-14 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border px-6 flex items-center justify-between shrink-0 z-20">
-          <div className="flex items-center gap-4 flex-1">
-            <h2 className="text-sm font-semibold">Dashboard</h2>
-          </div>
+      <Tabs defaultValue="Dashboard" className="relative z-10 flex min-h-screen" orientation="vertical">
+        <Sidebar />
+        <MobileNav />
+        
+        <main className="flex-1 flex flex-col overflow-hidden bg-background/50 backdrop-blur-sm pb-20 md:pb-0">
+          {/* Top Header */}
+          <header className="h-14 bg-background/80 backdrop-blur-md border-b border-border px-6 flex items-center justify-between shrink-0 z-20 sticky top-0">
+            <div className="flex items-center gap-4 flex-1">
+              <h2 className="text-sm font-semibold tracking-tight">Dashboard</h2>
+            </div>
 
           <div className="flex items-center gap-2">
              <div className="relative w-64 mr-2">
@@ -124,7 +139,7 @@ function App() {
         </header>
 
         {/* Dashboard Content */}
-        <div className="flex-1 overflow-hidden bg-muted/30 p-6">
+        <div className="flex-1 overflow-hidden p-6">
           {/* DASHBOARD TAB */}
           <TabsContent value="Dashboard" className="mt-0 h-full w-full animate-in fade-in duration-300 data-[state=inactive]:hidden focus-visible:outline-none overflow-auto">
             <div className="max-w-7xl mx-auto space-y-6">
@@ -209,8 +224,9 @@ function App() {
              </div>
           </TabsContent>
         </div>
-      </main>
-    </Tabs>
+        </main>
+      </Tabs>
+    </div>
   );
 }
 

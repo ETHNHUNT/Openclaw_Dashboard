@@ -15,7 +15,7 @@ const navItems = [
 
 export default function Sidebar() {
   return (
-    <aside className="w-64 bg-sidebar border-r border-sidebar-border h-screen flex flex-col shrink-0">
+    <aside className="hidden md:flex w-64 bg-sidebar border-r border-sidebar-border h-screen flex-col shrink-0">
       {/* Branding */}
       <div className="p-6">
         <div className="flex items-center gap-3">

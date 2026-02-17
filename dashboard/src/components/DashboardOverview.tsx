@@ -65,25 +65,29 @@ export default function DashboardOverview() {
       title: 'Total Missions',
       value: stats.totalTasks,
       icon: Target,
-      className: 'text-blue-500',
+      className: 'text-blue-400',
+      gradient: 'from-blue-500/20 to-blue-600/5',
     },
     {
       title: 'Active',
       value: stats.activeTasks,
       icon: Activity,
-      className: 'text-amber-500',
+      className: 'text-amber-400',
+      gradient: 'from-amber-500/20 to-amber-600/5',
     },
     {
       title: 'Completed',
       value: stats.completedTasks,
       icon: CheckCircle2,
-      className: 'text-emerald-500',
+      className: 'text-emerald-400',
+      gradient: 'from-emerald-500/20 to-emerald-600/5',
     },
     {
       title: 'High Priority',
       value: stats.highPriorityCount,
       icon: AlertCircle,
-      className: 'text-rose-500',
+      className: 'text-rose-400',
+      gradient: 'from-rose-500/20 to-rose-600/5',
     },
   ];
 
@@ -94,76 +98,83 @@ export default function DashboardOverview() {
         {metrics.map((metric, idx) => {
             const Icon = metric.icon;
             return (
-              <Card key={idx}>
-                <CardContent className="p-6 flex items-center justify-between space-y-0">
+              <div key={idx} className="flash-card relative overflow-hidden rounded-xl p-6 group">
+                <div className={`absolute inset-0 bg-gradient-to-br ${metric.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                <div className="relative z-10 flex items-center justify-between">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">
+                    <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
                       {metric.title}
                     </p>
-                    <div className="text-2xl font-bold">
+                    <div className="text-3xl font-bold text-white tracking-tight">
                       {metric.value}
                     </div>
                   </div>
-                  <div className={`p-2 bg-secondary rounded-full ${metric.className}`}>
-                    <Icon className="h-4 w-4" />
+                  <div className={`p-3 rounded-xl bg-zinc-900/50 border border-white/5 ${metric.className} shadow-lg`}>
+                    <Icon className="h-5 w-5" />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )
         })}
       </div>
 
       {/* PROGRESS OVERVIEW */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Completion Progress
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.completionRate}%</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.completedTasks} of {stats.totalTasks} missions completed
-            </p>
-            <Progress value={stats.completionRate} className="mt-4 h-2" />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Mission Status
-            </CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                  <span className="text-sm font-medium">Active Missions</span>
-                </div>
-                <span className="text-sm text-muted-foreground">{stats.activeTasks}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-rose-500 rounded-full"></div>
-                  <span className="text-sm font-medium">High Priority</span>
-                </div>
-                <span className="text-sm text-muted-foreground">{stats.highPriorityCount}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                  <span className="text-sm font-medium">Completed</span>
-                </div>
-                <span className="text-sm text-muted-foreground">{stats.completedTasks}</span>
+        <div className="glass-panel rounded-xl p-6">
+          <div className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <div className="space-y-1">
+              <h3 className="text-sm font-medium text-white">Completion Velocity</h3>
+              <p className="text-xs text-zinc-500">Task completion rate over time</p>
+            </div>
+            <TrendingUp className="h-4 w-4 text-zinc-400" />
+          </div>
+          <div>
+            <div className="flex items-end gap-2 mb-2">
+              <div className="text-4xl font-bold text-white">{stats.completionRate}%</div>
+              <div className="text-xs text-emerald-400 mb-1.5 font-medium flex items-center">
+                +12% <span className="text-zinc-500 ml-1 font-normal">vs last week</span>
               </div>
             </div>
-          </CardContent>
-        </Card>
+            <Progress value={stats.completionRate} className="h-2 bg-zinc-800" />
+            <div className="mt-4 flex justify-between text-xs text-zinc-500 font-mono">
+              <span>{stats.completedTasks} Done</span>
+              <span>{stats.totalTasks} Total</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="glass-panel rounded-xl p-6">
+          <div className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <div className="space-y-1">
+              <h3 className="text-sm font-medium text-white">Mission Status</h3>
+              <p className="text-xs text-zinc-500">Current workload distribution</p>
+            </div>
+            <Clock className="h-4 w-4 text-zinc-400" />
+          </div>
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center justify-between group cursor-default">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)] group-hover:scale-125 transition-transform"></div>
+                <span className="text-sm text-zinc-300">Active Missions</span>
+              </div>
+              <span className="text-sm font-mono text-white bg-zinc-800 px-2 py-0.5 rounded">{stats.activeTasks}</span>
+            </div>
+            <div className="flex items-center justify-between group cursor-default">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-rose-500 rounded-full shadow-[0_0_8px_rgba(244,63,94,0.5)] group-hover:scale-125 transition-transform"></div>
+                <span className="text-sm text-zinc-300">High Priority</span>
+              </div>
+              <span className="text-sm font-mono text-white bg-zinc-800 px-2 py-0.5 rounded">{stats.highPriorityCount}</span>
+            </div>
+            <div className="flex items-center justify-between group cursor-default">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)] group-hover:scale-125 transition-transform"></div>
+                <span className="text-sm text-zinc-300">Completed</span>
+              </div>
+              <span className="text-sm font-mono text-white bg-zinc-800 px-2 py-0.5 rounded">{stats.completedTasks}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

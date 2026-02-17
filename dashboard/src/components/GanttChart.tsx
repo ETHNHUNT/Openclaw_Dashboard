@@ -144,7 +144,7 @@ export default function GanttChart() {
       </CardHeader>
 
       <CardContent className="pt-8">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto pb-4 custom-scrollbar touch-auto">
           {/* Header with dates */}
           <div className="min-w-max">
             <div className="flex gap-1 mb-6">

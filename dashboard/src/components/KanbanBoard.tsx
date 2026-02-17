@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import TaskDetailModal from './TaskDetailModal';
+import TaskDrawer from './TaskDrawer';
 import {
   DndContext,
   DragOverlay,
@@ -41,10 +41,11 @@ interface Task {
 
 const columns = ['Planning', 'In Progress', 'Done'];
 
+// Flash UI Style Badges
 const priorityConfig: Record<string, { color: string, badge: string }> = {
-  High: { color: 'text-red-500', badge: 'bg-red-500/10 text-red-500 hover:bg-red-500/20 border-red-500/20' },
-  Medium: { color: 'text-amber-500', badge: 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border-amber-500/20' },
-  Low: { color: 'text-blue-500', badge: 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-blue-500/20' },
+  High: { color: 'text-white', badge: 'bg-red-500/10 text-red-400 border border-red-500/20' },
+  Medium: { color: 'text-white', badge: 'bg-amber-500/10 text-amber-400 border border-amber-500/20' },
+  Low: { color: 'text-white', badge: 'bg-blue-500/10 text-blue-400 border border-blue-500/20' },
 };
 
 interface SortableTaskCardProps {
@@ -65,70 +66,83 @@ function SortableTaskCard({ task, onDelete, onDuplicate, onClick }: SortableTask
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="mb-3">
-      <Card
+    <div ref={setNodeRef} style={style} className="mb-4">
+      {/* Flash UI Artifact Card Style */}
+      <div
         onClick={() => onClick(task)}
-        className={`bg-card hover:bg-accent/50 border-border hover:border-primary/50 transition-all cursor-pointer group shadow-sm hover:shadow-md ${isDragging ? 'ring-2 ring-primary' : ''}`}
+        className={`
+          flash-card group relative overflow-hidden rounded-xl
+          ${isDragging ? 'ring-1 ring-white/30 shadow-2xl scale-105' : ''}
+        `}
       >
-        <CardContent className="p-4 space-y-3">
-          <div className="flex justify-between items-start gap-2">
-            <h4 className="text-sm font-medium text-foreground leading-snug line-clamp-2">
-              {task.title}
-            </h4>
-            <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0 mt-0.5">
-              <GripVertical size={14} />
-            </div>
+        {/* Header/Grab Area */}
+        <div className="flex justify-between items-start p-4 pb-2">
+          <div className="flex items-center gap-2">
+             <Badge className={`flash-badge ${priorityConfig[task.priority]?.badge}`}>
+                {task.priority}
+             </Badge>
           </div>
           
-          {task.desc && (
-            <p className="text-xs text-muted-foreground line-clamp-2">{task.desc}</p>
-          )}
-
-          <div className="flex items-center justify-between pt-2">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className={`text-[10px] h-5 px-1.5 font-medium border ${priorityConfig[task.priority]?.badge || 'border-border'}`}>
-                {task.priority}
-              </Badge>
-              {task.assignedTo && (
-                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 font-normal bg-secondary text-secondary-foreground">
-                  {task.assignedTo}
-                </Badge>
-              )}
-            </div>
-            
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-               {task.comments?.length > 0 && (
-                  <div className="flex items-center gap-1 text-muted-foreground mr-2">
-                    <MessageSquare size={12} />
-                    <span className="text-[10px]">{task.comments.length}</span>
-                  </div>
-               )}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-muted-foreground hover:text-foreground"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDuplicate(task);
-                }}
-              >
-                <CopyIcon size={12} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(task.id);
-                }}
-              >
-                <Trash2 size={12} />
-              </Button>
-            </div>
+          <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-zinc-600 hover:text-white transition-colors">
+            <GripVertical size={14} />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Content */}
+        <div className="px-4 pb-4">
+          <h4 className="text-sm font-medium text-white leading-snug line-clamp-2 mb-1">
+            {task.title}
+          </h4>
+          {task.desc && (
+            <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">
+              {task.desc}
+            </p>
+          )}
+        </div>
+
+        {/* Footer / Meta */}
+        <div className="px-4 py-3 border-t border-zinc-800/50 bg-zinc-900/30 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+             {task.assignedTo ? (
+                <div className="flex items-center gap-1.5">
+                   <div className="w-4 h-4 rounded-full bg-zinc-700 flex items-center justify-center text-[8px] font-bold text-white">
+                      {task.assignedTo.charAt(0)}
+                   </div>
+                   <span className="text-[10px] text-zinc-400">{task.assignedTo}</span>
+                </div>
+             ) : (
+                <span className="text-[10px] text-zinc-600">Unassigned</span>
+             )}
+          </div>
+
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+             {task.comments?.length > 0 && (
+                <div className="flex items-center gap-1 text-zinc-500 mr-2">
+                  <MessageSquare size={12} />
+                  <span className="text-[10px]">{task.comments.length}</span>
+                </div>
+             )}
+            <button
+              className="p-1.5 text-zinc-500 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDuplicate(task);
+              }}
+            >
+              <CopyIcon size={12} />
+            </button>
+            <button
+              className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-full transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(task.id);
+              }}
+            >
+              <Trash2 size={12} />
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -302,27 +316,27 @@ export default function KanbanBoard() {
   const activeTask = activeId ? tasks.find((t) => t.id === activeId) : null;
 
   return (
-    <div className="h-full flex flex-col space-y-4">
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-1">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+    <div className="h-full flex flex-col space-y-6">
+      {/* Flash UI Toolbar - Glass Effect */}
+      <div className="glass-panel rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="relative w-full sm:w-64">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 h-4 w-4" />
             <Input
-              placeholder="Filter tasks..."
+              placeholder="Search missions..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-9 bg-background"
+              className="pl-10 h-10 bg-zinc-900/50 border-zinc-800 text-sm focus:border-zinc-700 rounded-xl"
             />
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-9 gap-2">
-                <Filter size={14} />
-                {priorityFilter === 'All' ? 'Priority' : priorityFilter}
+              <Button variant="outline" size="sm" className="h-10 px-4 gap-2 bg-zinc-900/50 border-zinc-800 hover:bg-zinc-800 rounded-xl">
+                <Filter size={14} className="text-zinc-400" />
+                <span className="text-zinc-300">{priorityFilter === 'All' ? 'Filter' : priorityFilter}</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-800 text-zinc-300">
               <DropdownMenuItem onClick={() => setPriorityFilter('All')}>All Priorities</DropdownMenuItem>
               <DropdownMenuItem onClick={() => setPriorityFilter('High')}>High</DropdownMenuItem>
               <DropdownMenuItem onClick={() => setPriorityFilter('Medium')}>Medium</DropdownMenuItem>
@@ -334,15 +348,15 @@ export default function KanbanBoard() {
         <div className="flex items-center gap-2">
            <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="h-9 gap-1 font-medium bg-primary hover:bg-primary/90">
+              <Button size="sm" className="h-10 px-6 gap-2 font-medium bg-white text-black hover:bg-zinc-200 rounded-full shadow-lg shadow-white/10 transition-all hover:scale-105">
                 <Plus size={16} />
-                New Task
+                New Mission
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-zinc-950 border-zinc-800 text-white sm:rounded-2xl">
               <DialogHeader>
                 <DialogTitle>Create Task</DialogTitle>
-                <DialogDescription>Add a new task to your board.</DialogDescription>
+                <DialogDescription className="text-zinc-400">Add a new task to your board.</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
@@ -351,6 +365,7 @@ export default function KanbanBoard() {
                     placeholder="Task title"
                     value={newTask.title}
                     onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                    className="bg-zinc-900 border-zinc-800"
                   />
                 </div>
                 <div className="space-y-2">
@@ -359,6 +374,7 @@ export default function KanbanBoard() {
                     placeholder="Details..."
                     value={newTask.desc}
                     onChange={(e) => setNewTask({ ...newTask, desc: e.target.value })}
+                    className="bg-zinc-900 border-zinc-800"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -368,10 +384,10 @@ export default function KanbanBoard() {
                       value={newTask.priority}
                       onValueChange={(v) => setNewTask({ ...newTask, priority: v })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-zinc-900 border-zinc-800">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
                         <SelectItem value="High">High</SelectItem>
                         <SelectItem value="Medium">Medium</SelectItem>
                         <SelectItem value="Low">Low</SelectItem>
@@ -384,10 +400,10 @@ export default function KanbanBoard() {
                       value={newTask.assignedTo}
                       onValueChange={(v) => setNewTask({ ...newTask, assignedTo: v })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-zinc-900 border-zinc-800">
                         <SelectValue placeholder="Unassigned" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
                         <SelectItem value="">Unassigned</SelectItem>
                         {agents.map((agent) => (
                           <SelectItem key={agent.id} value={agent.name}>{agent.name}</SelectItem>
@@ -398,8 +414,8 @@ export default function KanbanBoard() {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="ghost" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
-                <Button onClick={handleAddTask}>Create</Button>
+                <Button variant="ghost" onClick={() => setIsAddModalOpen(false)} className="text-zinc-400 hover:text-white">Cancel</Button>
+                <Button onClick={handleAddTask} className="bg-white text-black hover:bg-zinc-200 rounded-full">Create</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -414,28 +430,26 @@ export default function KanbanBoard() {
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 h-full overflow-hidden px-1">
           {columns.map((col) => {
             const columnTasks = filteredTasks.filter((t) => t.status === col);
             return (
-              <div key={col} className="flex flex-col h-full bg-muted/30 rounded-lg p-2 border border-border/50">
-                <div className="flex items-center justify-between mb-3 px-2 py-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-foreground">
+              <div key={col} className="flex flex-col h-full">
+                {/* Column Header - Minimalist */}
+                <div className="flex items-center justify-between mb-4 px-2">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-widest">
                       {col}
                     </h3>
-                    <Badge variant="secondary" className="h-5 px-1.5 min-w-[1.25rem] justify-center">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-zinc-800 text-xs text-zinc-400 font-mono">
                       {columnTasks.length}
-                    </Badge>
+                    </span>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground">
-                    <MoreVertical size={14} />
-                  </Button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-1">
+                <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                   <SortableContext items={columnTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-                    <div className="space-y-3 pb-4">
+                    <div className="space-y-4 pb-12">
                       {columnTasks.map((task) => (
                         <SortableTaskCard
                           key={task.id}
@@ -446,8 +460,8 @@ export default function KanbanBoard() {
                         />
                       ))}
                       {columnTasks.length === 0 && (
-                        <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground border-2 border-dashed border-muted rounded-lg mx-1">
-                          <p className="text-xs">No tasks</p>
+                        <div className="flex flex-col items-center justify-center py-12 text-center text-zinc-700 border border-dashed border-zinc-800/50 rounded-xl bg-zinc-900/20">
+                          <p className="text-xs uppercase tracking-wide">No Tasks</p>
                         </div>
                       )}
                     </div>
@@ -460,16 +474,14 @@ export default function KanbanBoard() {
 
         <DragOverlay>
           {activeTask ? (
-            <Card className="bg-card shadow-xl border-primary/50 cursor-grabbing w-[300px] opacity-90">
-              <CardContent className="p-4">
-                <h4 className="text-sm font-medium">{activeTask.title}</h4>
-              </CardContent>
-            </Card>
+            <div className="flash-card p-4 rounded-xl shadow-2xl scale-105 border-white/20 cursor-grabbing">
+              <h4 className="text-sm font-medium text-white">{activeTask.title}</h4>
+            </div>
           ) : null}
         </DragOverlay>
       </DndContext>
 
-      <TaskDetailModal
+      <TaskDrawer
         task={selectedTask}
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
