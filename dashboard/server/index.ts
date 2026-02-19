@@ -240,8 +240,46 @@ app.get('/api/stats', async (req, res) => {
   }
 });
 
+// GET /api/stats/by-assignee - Tasks grouped by assignee
+app.get('/api/stats/by-assignee', async (req, res) => {
+  try {
+    const tasks = await prisma.task.findMany();
+    
+    const assignees = {
+      'me': { total: 0, planning: 0, inProgress: 0, done: 0 },
+      'you': { total: 0, planning: 0, inProgress: 0, done: 0 },
+      'unassigned': { total: 0, planning: 0, inProgress: 0, done: 0 },
+    };
+    
+    for (const task of tasks) {
+      const key = task.assignedTo?.toLowerCase() || 'unassigned';
+      if (key.includes('agent') || key.includes('me') || key === 'ai') {
+        assignees['me'].total++;
+        if (task.status === 'Planning') assignees['me'].planning++;
+        else if (task.status === 'In Progress') assignees['me'].inProgress++;
+        else if (task.status === 'Done') assignees['me'].done++;
+      } else if (key && key !== 'unassigned' && key !== 'null') {
+        assignees['you'].total++;
+        if (task.status === 'Planning') assignees['you'].planning++;
+        else if (task.status === 'In Progress') assignees['you'].inProgress++;
+        else if (task.status === 'Done') assignees['you'].done++;
+      } else {
+        assignees['unassigned'].total++;
+        if (task.status === 'Planning') assignees['unassigned'].planning++;
+        else if (task.status === 'In Progress') assignees['unassigned'].inProgress++;
+        else if (task.status === 'Done') assignees['unassigned'].done++;
+      }
+    }
+    
+    res.json(assignees);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch assignee stats' });
+  }
+});
+
 // --- FILESYSTEM API ---
-const WORKSPACE_ROOT = '/home/codespace/.openclaw/workspace';
+const WORKSPACE_ROOT = process.env.WORKSPACE_ROOT || path.join(os.homedir(), '.openclaw', 'workspace');
 
 // GET /api/files - List files in memory folder
 app.get('/api/files', async (req, res) => {
